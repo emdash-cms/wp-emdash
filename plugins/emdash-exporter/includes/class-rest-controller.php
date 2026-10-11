@@ -158,7 +158,7 @@ class EmDash_Exporter_REST_Controller {
     /**
      * Check if user has permission to export.
      *
-     * Requires the `export` capability (Administrators and Editors). The
+     * Requires the `export` capability (by default only Administrators). The
      * export exposes all content including drafts, private posts, author
      * emails, and site options -- `edit_posts` (Contributors) is not enough.
      */

@@ -454,8 +454,20 @@ class EmDash_Content_Exporter {
         
         $formatted = [];
         foreach ($fields as $key => $value) {
+            // Relationship, post object, user and taxonomy fields set to the
+            // object return format give WP_Post, WP_User and WP_Term objects
+            if (is_object($value)) {
+                $formatted[$key] = $this->format_acf_object($value);
+            }
+            // User fields on the default array format, one user or several
+            elseif ($this->is_acf_user_array($value)) {
+                $formatted[$key] = $value['ID'];
+            }
+            elseif (is_array($value) && isset($value[0]) && $this->is_acf_user_array($value[0])) {
+                $formatted[$key] = array_column($value, 'ID');
+            }
             // Handle image fields (return ID or array)
-            if (is_array($value) && isset($value['ID'])) {
+            elseif (is_array($value) && isset($value['ID'])) {
                 $formatted[$key] = [
                     'type' => 'image',
                     'id' => $value['ID'],
@@ -477,6 +489,27 @@ class EmDash_Content_Exporter {
         }
         
         return $formatted;
+    }
+    
+    /**
+     * Reduce a post, user or term object to its ID, so the export never
+     * carries a related post's password or a user's password hash
+     */
+    private function format_acf_object($value) {
+        if ($value instanceof WP_Post || $value instanceof WP_User) {
+            return $value->ID;
+        }
+        if ($value instanceof WP_Term) {
+            return $value->term_id;
+        }
+        return $value;
+    }
+    
+    /**
+     * Whether a value is one user from an ACF user field on the array format
+     */
+    private function is_acf_user_array($value) {
+        return is_array($value) && isset($value['ID'], $value['user_email']);
     }
     
     /**
