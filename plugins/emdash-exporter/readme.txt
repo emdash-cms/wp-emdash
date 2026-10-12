@@ -1,5 +1,5 @@
 === EmDash Exporter ===
-Contributors: ascorbic
+Contributors: emdashcms
 Tags: export, migration, cms, emdash, astro
 Requires at least: 5.6
 Tested up to: 7.1
