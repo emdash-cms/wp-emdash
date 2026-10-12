@@ -1,0 +1,25 @@
+name: Plugin Check
+
+# Runs WordPress.org's Plugin Check on the exporter. Errors fail the job,
+# warnings show up as annotations.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  plugin-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Run Plugin Check
+        uses: WordPress/plugin-check-action@10857da14b6c2246d15402b3e69f777edcf8c12e # v1.1.9
+        with:
+          build-dir: plugins/emdash-exporter
+          repo-token: ""
