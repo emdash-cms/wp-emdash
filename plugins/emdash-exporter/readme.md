@@ -3,13 +3,13 @@
     Contributors: ascorbic
     Tags: export, migration, cms, emdash, astro
     Requires at least: 5.6
-    Tested up to: 6.4
+    Tested up to: 7.1
     Requires PHP: 7.4
     Stable tag: 1.2.0
     License: GPL3
     License URI: https://opensource.org/license/gpl-3.0
 
-Migrate your WordPress site to EmDash CMS with a guided wizard. Full support for posts, pages, custom post types, ACF fields, media, menus, translations, and SEO data.
+Migrate your WordPress site to EmDash CMS with a guided wizard: posts, pages, custom post types, ACF fields, media, menus, translations, and SEO.
 
 ## Description
 
@@ -32,7 +32,7 @@ EmDash Exporter adds a guided migration wizard (Tools → EmDash Migration) and 
 
 ## Authentication
 
-Uses WordPress Application Passwords (built into WordPress 5.6+). The wizard creates one for you and packages it into a single migration key. You can revoke it at any time.
+Uses WordPress Application Passwords (built into WordPress 5.6+). The wizard creates one for you and packages it into a single migration key. You can revoke it at any time, and deactivating or deleting the plugin revokes it for every user.
 
 ## Installation
 
@@ -54,7 +54,7 @@ All endpoints are under `/wp-json/emdash/v1/`
 - `GET /analyze` – Full site analysis for import planning
 - `GET /content?post_type=post` – Get posts (paginated)
 - `GET /media` – Get media items (paginated)
-- `GET /media/{id}?include_data=true` – Get single media item with base64 data
+- `GET /media/{id}` – Get a single media item
 - `GET /taxonomies` – Get all taxonomies and terms
 - `GET /options` – Get site options
 - `GET /menus` – Get navigation menus with items and hierarchy
@@ -72,7 +72,7 @@ All endpoints are under `/wp-json/emdash/v1/`
 
 ### What about my media files?
 
-> Media URLs are included in the export. EmDash downloads them directly from your WordPress site during import. Optionally, small files can be transferred inline as base64.
+> Media URLs are included in the export. EmDash downloads them directly from your WordPress site during import.
 
 ### Does this work with custom post types?
 

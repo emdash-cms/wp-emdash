@@ -45,3 +45,11 @@ function emdash_exporter_activate() {
     set_transient('emdash_exporter_activated', 1, 60);
 }
 register_activation_hook(__FILE__, 'emdash_exporter_activate');
+
+/**
+ * Revoke all migration keys on deactivation (uninstall.php covers deletion).
+ */
+function emdash_exporter_deactivate() {
+    EmDash_Migration_Key::revoke_all();
+}
+register_deactivation_hook(__FILE__, 'emdash_exporter_deactivate');

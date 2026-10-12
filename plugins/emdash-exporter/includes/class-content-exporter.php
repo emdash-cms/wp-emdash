@@ -309,19 +309,17 @@ class EmDash_Content_Exporter {
         global $wpdb;
         
         // Get most common meta keys for this post type
-        $query = $wpdb->prepare("
+        $results = $wpdb->get_results($wpdb->prepare("
             SELECT pm.meta_key, COUNT(*) as count
             FROM {$wpdb->postmeta} pm
             INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
             WHERE p.post_type = %s
-            AND pm.meta_key NOT LIKE '\\_%%'
+            AND pm.meta_key NOT LIKE %s
             GROUP BY pm.meta_key
             HAVING count > 1
             ORDER BY count DESC
             LIMIT 50
-        ", $post_type);
-        
-        $results = $wpdb->get_results($query);
+        ", $post_type, $wpdb->esc_like('_') . '%'));
         
         $fields = [];
         foreach ($results as $row) {

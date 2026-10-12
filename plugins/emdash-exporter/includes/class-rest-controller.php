@@ -84,11 +84,6 @@ class EmDash_Exporter_REST_Controller {
                     'default' => 1,
                     'minimum' => 1,
                 ],
-                'include_data' => [
-                    'type' => 'boolean',
-                    'default' => false,
-                    'description' => 'Include base64-encoded file data (use with caution)',
-                ],
             ],
         ]);
         
@@ -100,10 +95,6 @@ class EmDash_Exporter_REST_Controller {
                 'id' => [
                     'required' => true,
                     'type' => 'integer',
-                ],
-                'include_data' => [
-                    'type' => 'boolean',
-                    'default' => false,
                 ],
             ],
         ]);
@@ -178,24 +169,20 @@ class EmDash_Exporter_REST_Controller {
      * Header check endpoint - reports whether an Authorization header arrived
      */
     public function header_check() {
-        $header = null;
-        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-            $header = $_SERVER['HTTP_AUTHORIZATION'];
-        } elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
-            $header = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
-        } elseif (function_exists('getallheaders')) {
+        $received = !empty($_SERVER['HTTP_AUTHORIZATION']) || !empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
+        if (!$received && function_exists('getallheaders')) {
             // mod_php can expose the header via the Apache API only,
             // without populating $_SERVER['HTTP_AUTHORIZATION'].
             foreach (getallheaders() as $name => $value) {
                 if (strtolower($name) === 'authorization') {
-                    $header = $value;
+                    $received = !empty($value);
                     break;
                 }
             }
         }
         
         return [
-            'authorization_header_received' => !empty($header),
+            'authorization_header_received' => $received,
         ];
     }
     
@@ -308,20 +295,16 @@ class EmDash_Exporter_REST_Controller {
         $exporter = new EmDash_Media_Exporter();
         return $exporter->get_media(
             $request->get_param('per_page'),
-            $request->get_param('page'),
-            $request->get_param('include_data')
+            $request->get_param('page')
         );
     }
     
     /**
-     * Get single media item with optional data
+     * Get single media item
      */
     public function get_media_item($request) {
         $exporter = new EmDash_Media_Exporter();
-        return $exporter->get_media_item(
-            $request->get_param('id'),
-            $request->get_param('include_data')
-        );
+        return $exporter->get_media_item($request->get_param('id'));
     }
     
     /**

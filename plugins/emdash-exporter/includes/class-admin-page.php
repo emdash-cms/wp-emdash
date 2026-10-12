@@ -13,6 +13,7 @@ defined('ABSPATH') || exit;
 class EmDash_Admin_Page {
 
     const SLUG = 'emdash-migration';
+    // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- link target of the deploy button, nothing is loaded from it.
     const DEPLOY_URL = 'https://deploy.workers.cloudflare.com/?url=https://github.com/emdash-cms/templates/tree/main/blog-cloudflare';
     const TEMPLATES_URL = 'https://github.com/emdash-cms/templates';
 

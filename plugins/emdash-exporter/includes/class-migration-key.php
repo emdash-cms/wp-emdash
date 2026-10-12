@@ -43,11 +43,7 @@ class EmDash_Migration_Key {
 
         // Revoke a previous migration password so regenerating the key
         // invalidates the old one instead of piling up credentials.
-        foreach (WP_Application_Passwords::get_user_application_passwords($user->ID) as $item) {
-            if ($item['name'] === self::APP_NAME) {
-                WP_Application_Passwords::delete_application_password($user->ID, $item['uuid']);
-            }
-        }
+        self::revoke_for_user($user->ID);
 
         $created = WP_Application_Passwords::create_new_application_password($user->ID, [
             'name' => self::APP_NAME,
@@ -82,11 +78,32 @@ class EmDash_Migration_Key {
         if (!$user || !$user->exists()) {
             return false;
         }
+        return self::revoke_for_user($user->ID);
+    }
 
+    /**
+     * Revoke the migration application passwords of every user, so no key
+     * keeps working once the plugin is deactivated or deleted.
+     */
+    public static function revoke_all() {
+        if (!class_exists('WP_Application_Passwords')) {
+            return;
+        }
+        $user_ids = get_users([
+            'meta_key' => WP_Application_Passwords::USERMETA_KEY_APPLICATION_PASSWORDS,
+            'fields' => 'ID',
+            'blog_id' => 0,
+        ]);
+        foreach ($user_ids as $user_id) {
+            self::revoke_for_user((int) $user_id);
+        }
+    }
+
+    private static function revoke_for_user($user_id) {
         $revoked = false;
-        foreach (WP_Application_Passwords::get_user_application_passwords($user->ID) as $item) {
+        foreach (WP_Application_Passwords::get_user_application_passwords($user_id) as $item) {
             if ($item['name'] === self::APP_NAME) {
-                WP_Application_Passwords::delete_application_password($user->ID, $item['uuid']);
+                WP_Application_Passwords::delete_application_password($user_id, $item['uuid']);
                 $revoked = true;
             }
         }

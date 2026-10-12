@@ -2,7 +2,7 @@
 /**
  * Media Exporter
  * 
- * Handles exporting media attachments with metadata and optional file data
+ * Handles exporting media attachments with metadata
  */
 
 defined('ABSPATH') || exit;
@@ -12,7 +12,7 @@ class EmDash_Media_Exporter {
     /**
      * Get paginated list of media items
      */
-    public function get_media($per_page = 100, $page = 1, $include_data = false) {
+    public function get_media($per_page = 100, $page = 1) {
         $args = [
             'post_type' => 'attachment',
             'post_status' => 'inherit',
@@ -26,7 +26,7 @@ class EmDash_Media_Exporter {
         $items = [];
         
         foreach ($query->posts as $attachment) {
-            $items[] = $this->format_attachment($attachment, $include_data);
+            $items[] = $this->format_attachment($attachment);
         }
         
         return [
@@ -41,7 +41,7 @@ class EmDash_Media_Exporter {
     /**
      * Get a single media item
      */
-    public function get_media_item($id, $include_data = false) {
+    public function get_media_item($id) {
         $attachment = get_post($id);
         
         if (!$attachment || $attachment->post_type !== 'attachment') {
@@ -52,13 +52,13 @@ class EmDash_Media_Exporter {
             );
         }
         
-        return $this->format_attachment($attachment, $include_data);
+        return $this->format_attachment($attachment);
     }
     
     /**
      * Format an attachment for export
      */
-    private function format_attachment($attachment, $include_data = false) {
+    private function format_attachment($attachment) {
         $metadata = wp_get_attachment_metadata($attachment->ID);
         $url = wp_get_attachment_url($attachment->ID);
         $file_path = get_attached_file($attachment->ID);
@@ -104,19 +104,6 @@ class EmDash_Media_Exporter {
                     'height' => (int) $size_data['height'],
                     'mime_type' => $size_data['mime-type'] ?? $attachment->post_mime_type,
                 ];
-            }
-        }
-        
-        // Include base64-encoded file data if requested
-        if ($include_data && $file_path && file_exists($file_path)) {
-            // Limit file size to prevent memory issues (50MB)
-            $max_size = 50 * 1024 * 1024;
-            $file_size = filesize($file_path);
-            
-            if ($file_size <= $max_size) {
-                $data['data'] = base64_encode(file_get_contents($file_path));
-            } else {
-                $data['data_error'] = 'File too large for inline transfer';
             }
         }
         
