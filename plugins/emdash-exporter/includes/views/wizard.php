@@ -5,6 +5,7 @@
  * Variables from EmDash_Admin_Page::render():
  * @var array $checks     Health check results
  * @var bool  $checks_ok  No check failed
+ * @var bool  $checks_warn At least one check returned a warning
  * @var bool  $key_exists Migration app password exists
  * @var array $overview   Content overview data
  */
@@ -26,7 +27,9 @@ defined('ABSPATH') || exit;
 				<p><?php esc_html_e('We check whether EmDash will be able to connect to this site.', 'emdash-exporter'); ?></p>
 			</div>
 			<?php if ($checks_ok) : ?>
-				<span class="emdash-step-status"><?php esc_html_e('All checks passed', 'emdash-exporter'); ?></span>
+				<span class="emdash-step-status"><?php echo $checks_warn
+					? esc_html__('Passed with warnings', 'emdash-exporter')
+					: esc_html__('All checks passed', 'emdash-exporter'); ?></span>
 			<?php endif; ?>
 		</div>
 		<div class="emdash-step-body">
@@ -68,9 +71,9 @@ defined('ABSPATH') || exit;
 						? esc_html__('Regenerate migration key', 'emdash-exporter')
 						: esc_html__('Generate migration key', 'emdash-exporter'); ?>
 				</button>
+				<button type="button" class="button" id="emdash-revoke-key"<?php echo $key_exists ? '' : ' hidden'; ?>><?php esc_html_e('Revoke key', 'emdash-exporter'); ?></button>
 				<?php if ($key_exists) : ?>
-					<button type="button" class="button" id="emdash-revoke-key"><?php esc_html_e('Revoke key', 'emdash-exporter'); ?></button>
-					<p class="description"><?php esc_html_e('A migration key already exists. For security, the key is only displayed once when generated — regenerate it if you no longer have it.', 'emdash-exporter'); ?></p>
+					<p class="description" id="emdash-key-exists"><?php esc_html_e('A migration key already exists. For security, the key is only displayed once when generated — regenerate it if you no longer have it.', 'emdash-exporter'); ?></p>
 				<?php endif; ?>
 				<div id="emdash-key-result" hidden>
 					<div class="emdash-key-row">
@@ -153,10 +156,10 @@ defined('ABSPATH') || exit;
 							<li><?php esc_html_e('ACF custom fields', 'emdash-exporter'); ?></li>
 						<?php endif; ?>
 						<?php if ($overview['yoast']) : ?>
-							<li><?php esc_html_e('Yoast SEO metadata', 'emdash-exporter'); ?></li>
+							<li><?php esc_html_e('Yoast SEO titles and meta descriptions', 'emdash-exporter'); ?></li>
 						<?php endif; ?>
 						<?php if ($overview['rankmath']) : ?>
-							<li><?php esc_html_e('Rank Math SEO metadata', 'emdash-exporter'); ?></li>
+							<li><?php esc_html_e('Rank Math SEO titles and meta descriptions', 'emdash-exporter'); ?></li>
 						<?php endif; ?>
 						<?php if ($overview['i18n']) : ?>
 							<li><?php
@@ -179,6 +182,27 @@ defined('ABSPATH') || exit;
 									/* translators: %s: page builder names */
 									esc_html__('%s layouts (only standard editor content converts; builder pages arrive as plain content)', 'emdash-exporter'),
 									esc_html(implode(', ', $overview['page_builder']))
+								);
+							?></li>
+						<?php endif; ?>
+						<?php if ($overview['yoast'] || $overview['rankmath']) : ?>
+							<li><?php esc_html_e('SEO robots settings (noindex) and canonical URLs', 'emdash-exporter'); ?></li>
+						<?php endif; ?>
+						<?php if (!empty($overview['form_plugins'])) : ?>
+							<li><?php
+								printf(
+									/* translators: %s: form plugin names */
+									esc_html__('Forms and form entries from %s', 'emdash-exporter'),
+									esc_html(implode(', ', $overview['form_plugins']))
+								);
+							?></li>
+						<?php endif; ?>
+						<?php if (!empty($overview['redirect_plugins'])) : ?>
+							<li><?php
+								printf(
+									/* translators: %s: plugin names */
+									esc_html__('Redirects managed by %s', 'emdash-exporter'),
+									esc_html(implode(', ', $overview['redirect_plugins']))
 								);
 							?></li>
 						<?php endif; ?>

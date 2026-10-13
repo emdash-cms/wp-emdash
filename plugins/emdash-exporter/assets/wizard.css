@@ -2,6 +2,11 @@
 	max-width: 860px;
 }
 
+/* WordPress's .button sets display, which would override the hidden attribute. */
+.emdash-wizard [hidden] {
+	display: none !important;
+}
+
 .emdash-title {
 	margin-bottom: 20px;
 }
