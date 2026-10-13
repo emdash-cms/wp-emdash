@@ -12,6 +12,7 @@
 	var keyInput = document.getElementById("emdash-key-value");
 	var copyBtn = document.getElementById("emdash-copy-key");
 	var errorBox = document.getElementById("emdash-key-error");
+	var existsNote = document.getElementById("emdash-key-exists");
 
 	function post(action) {
 		var body = new URLSearchParams();
@@ -45,6 +46,9 @@
 					if (data && data.success && data.data && data.data.key) {
 						keyInput.value = data.data.key;
 						result.hidden = false;
+						originalText = cfg.i18n.regenerate;
+						if (revokeBtn) revokeBtn.hidden = false;
+						if (existsNote) existsNote.hidden = true;
 						keyInput.focus();
 						keyInput.select();
 					} else {

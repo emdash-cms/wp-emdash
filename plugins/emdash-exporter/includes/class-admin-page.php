@@ -58,6 +58,7 @@ class EmDash_Admin_Page {
                 'generating' => __('Generating…', 'emdash-exporter'),
                 'error' => __('Something went wrong. Please try again.', 'emdash-exporter'),
                 'revokeConfirm' => __('Revoke the migration key? EmDash will no longer be able to connect until you generate a new one.', 'emdash-exporter'),
+                'regenerate' => __('Regenerate migration key', 'emdash-exporter'),
             ],
         ]);
     }
@@ -132,6 +133,7 @@ class EmDash_Admin_Page {
         $health = new EmDash_Health_Check();
         $checks = $health->run();
         $checks_ok = EmDash_Health_Check::all_ok($checks);
+        $checks_warn = EmDash_Health_Check::has_warnings($checks);
         $key_exists = EmDash_Migration_Key::exists();
         $overview = $this->content_overview();
 
@@ -186,7 +188,53 @@ class EmDash_Admin_Page {
             'i18n' => $i18n,
             'non_public_types' => array_values($non_public),
             'page_builder' => $this->detect_page_builder(),
+            'form_plugins' => $this->detect_form_plugins(),
+            'redirect_plugins' => $this->detect_redirect_plugins(),
         ];
+    }
+
+    /**
+     * Detect form plugins. Their forms and entries live in plugin storage
+     * that the export does not cover.
+     */
+    private function detect_form_plugins() {
+        $plugins = [];
+        if (defined('WPCF7_VERSION')) {
+            $plugins[] = 'Contact Form 7';
+        }
+        if (defined('WPFORMS_VERSION')) {
+            $plugins[] = 'WPForms';
+        }
+        if (defined('FLUENTFORM_VERSION')) {
+            $plugins[] = 'Fluent Forms';
+        }
+        if (class_exists('GFForms')) {
+            $plugins[] = 'Gravity Forms';
+        }
+        if (class_exists('Ninja_Forms')) {
+            $plugins[] = 'Ninja Forms';
+        }
+        if (class_exists('FrmAppHelper')) {
+            $plugins[] = 'Formidable Forms';
+        }
+        return $plugins;
+    }
+
+    /**
+     * Detect plugins that manage redirects, which the export does not cover.
+     */
+    private function detect_redirect_plugins() {
+        $plugins = [];
+        if (defined('REDIRECTION_VERSION')) {
+            $plugins[] = 'Redirection';
+        }
+        if (defined('WPSEO_PREMIUM_VERSION')) {
+            $plugins[] = 'Yoast SEO Premium';
+        }
+        if (class_exists('RankMath') && in_array('redirections', (array) get_option('rank_math_modules', []), true)) {
+            $plugins[] = 'Rank Math';
+        }
+        return $plugins;
     }
 
     /**

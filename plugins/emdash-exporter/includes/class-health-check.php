@@ -16,13 +16,14 @@ class EmDash_Health_Check {
      * @return array[] Each: { id, label, status: 'pass'|'warn'|'fail', message, fix? }
      */
     public function run() {
-        return [
+        return array_values(array_filter([
             $this->check_permalinks(),
             $this->check_application_passwords(),
             $this->check_rest_loopback(),
             $this->check_authorization_header(),
             $this->check_reachability(),
-        ];
+            $this->check_bot_protection(),
+        ]));
     }
 
     /** True when every check passes (warnings are acceptable). */
@@ -33,6 +34,16 @@ class EmDash_Health_Check {
             }
         }
         return true;
+    }
+
+    /** True when at least one check returned a warning. */
+    public static function has_warnings(array $checks) {
+        foreach ($checks as $check) {
+            if ($check['status'] === 'warn') {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function check_permalinks() {
@@ -197,6 +208,25 @@ class EmDash_Health_Check {
             'label' => __('Publicly reachable', 'emdash-exporter'),
             'status' => 'pass',
             'message' => __('The site URL looks publicly reachable.', 'emdash-exporter'),
+        ];
+    }
+
+    /**
+     * Cloudflare adds CF-Ray to every request it proxies. Its bot protection
+     * answers server-side clients like EmDash with a challenge page, and
+     * whether it is on can't be seen from here, so this only warns.
+     */
+    private function check_bot_protection() {
+        if (empty($_SERVER['HTTP_CF_RAY'])) {
+            return null;
+        }
+
+        return [
+            'id' => 'bot_protection',
+            'label' => __('Cloudflare bot protection', 'emdash-exporter'),
+            'status' => 'warn',
+            'message' => __('This site is served through Cloudflare. If bot protection is on (Bot Fight Mode, Super Bot Fight Mode, or a challenge rule), Cloudflare answers EmDash with a challenge page and the import cannot connect.', 'emdash-exporter'),
+            'fix' => __('For the duration of the migration, add a WAF custom rule that skips bot protection for /wp-json/emdash/v1/. Bot Fight Mode on the Free plan cannot be skipped: turn it off and turn it back on afterwards.', 'emdash-exporter'),
         ];
     }
 }
