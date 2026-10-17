@@ -1,0 +1,14 @@
+{
+	"name": "emdash-exporter",
+	"version": "1.2.0",
+	"private": true,
+	"packageManager": "pnpm@11.9.0",
+	"scripts": {
+		"changeset": "changeset",
+		"version": "node scripts/version.mjs"
+	},
+	"devDependencies": {
+		"@changesets/changelog-github": "^1.0.1",
+		"@changesets/cli": "^3.0.2"
+	}
+}

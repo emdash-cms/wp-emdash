@@ -1,0 +1,8 @@
+{
+	"$schema": "https://unpkg.com/@changesets/config@4.0.0/schema.json",
+	"changelog": ["@changesets/changelog-github", { "repo": "emdash-cms/wp-emdash" }],
+	"commit": false,
+	"access": "restricted",
+	"baseBranch": "main",
+	"privatePackages": { "version": true, "tag": false }
+}
